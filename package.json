@@ -4,19 +4,28 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "npx tsc"
+    "dev": "nodemon --exec ts-node src/main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "test:config": "node --loader ./node_modules/ts-node/esm.mjs tests/test-config.ts",
+    "test:db": "node --loader ./node_modules/ts-node/esm.mjs tests/test-db.ts",
+    "test:all": "npm run test:config && npm run test:db"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@types/ioredis": "^4.28.10",
     "@types/node": "^25.0.3",
     "@types/pg": "^8.16.0",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "dotenv": "^17.2.3",
+    "ioredis": "^5.8.2",
     "pg": "^8.16.3"
   }
 }
