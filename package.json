@@ -10,7 +10,8 @@
     "test:config": "node --loader ./node_modules/ts-node/esm.mjs tests/test-config.ts",
     "test:db": "node --loader ./node_modules/ts-node/esm.mjs tests/test-db.ts",
     "test:reader":"node --loader ./node_modules/ts-node/esm.mjs tests/test-reader.ts",
-    "test:all": "npm run test:config && npm run test:db && npm run test:reader"
+    "test:parser":"node --loader ./node_modules/ts-node/esm.mjs tests/test-parser.ts",
+    "test:all": "npm run test:config && npm run test:db && npm run test:reader && npm run test:parser"
   },
   "keywords": [],
   "author": "",
