@@ -5,7 +5,12 @@ export class RedisWriter{
     private redis:Redis.Redis;
 
     constructor(redisConfig:{host:string,port:number,password?:string}){
-        this.redis = new Redis.Redis(redisConfig);
+        this.redis = new Redis.Redis({
+            ...redisConfig,
+            retryStrategy: () => null,
+            connectTimeout: 5000,
+            lazyConnect: true,
+        });
     }
 
     async write(change: ParsedChange): Promise<void>{
