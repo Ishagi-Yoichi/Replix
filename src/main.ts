@@ -13,6 +13,12 @@ async function main() {
   const db = new DatabaseConnection();
   await db.connect();
 
+  // Ensure replication slot exists before starting
+  await db.ensureReplicationSlot(
+    config.replication.slotName,
+    config.replication.plugin
+  );
+
   const redis = new Redis.Redis({
     host: config.redis.host,
     port: config.redis.port,

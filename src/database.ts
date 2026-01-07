@@ -40,6 +40,29 @@ export class DatabaseConnection{
         return this.client;
     }
     
+    async ensureReplicationSlot(slotName: string, plugin: string): Promise<void> {
+        if (!this.client) {
+            throw new Error('Database is not connected. Call connect() first.');
+        }
+        
+        // Check if slot already exists
+        const checkQuery = `
+            SELECT COUNT(*) as count 
+            FROM pg_replication_slots 
+            WHERE slot_name = $1
+        `;
+        const checkResult = await this.client.query(checkQuery, [slotName]);
+        
+        if (checkResult.rows[0].count === '0') {
+            console.log(`Creating replication slot "${slotName}" with plugin "${plugin}"...`);
+            const createQuery = `SELECT pg_create_logical_replication_slot($1, $2)`;
+            await this.client.query(createQuery, [slotName, plugin]);
+            console.log(`Replication slot "${slotName}" created successfully.`);
+        } else {
+            console.log(`Replication slot "${slotName}" already exists.`);
+        }
+    }
+    
     async close(): Promise<void> {
         if (this.client) {
             await this.client.end();
