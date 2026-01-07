@@ -1,5 +1,4 @@
 
-
 import { Client } from "pg";
 import { config } from "./config.js";
 export class DatabaseConnection{

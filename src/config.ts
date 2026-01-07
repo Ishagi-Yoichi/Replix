@@ -2,26 +2,26 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-interface Config{
-    postgres:{
-        host:String,
-        port:Number,
-        database:String,
-        user:String,
-        password:String,
+interface Config {
+    postgres: {
+        host: string,
+        port: number,
+        database: string,
+        user: string,
+        password: string,
     };
-    redis:{
-        host:String,
-        port:Number,
-        password:String,
+    redis: {
+        host: string,
+        port: number,
+        password: string,
     };
-    replication:{
-        slotName: String,
-        plugin: String,
+    replication: {
+        slotName: string,
+        plugin: string,
     };
-    cdc:{
-        pollInterval:Number,
-        batchSize:Number,
+    cdc: {
+        pollInterval: number,
+        batchSize: number,
     }
 }
 
