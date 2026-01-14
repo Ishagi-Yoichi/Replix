@@ -8,6 +8,7 @@ import { ChangeProcessor } from "./processor.js";
 import { RedisCheckpointStore } from "./checkpoint.js";
 import { ensureReplicationSlot } from "./slot.js";
 import { getSlotLag } from "./lag.js";
+import { DeadLetterQueue } from "./dlq.js";
 
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -45,6 +46,7 @@ async function main() {
     password: config.redis.password,
   });
 
+  const dlq = new DeadLetterQueue(redis);
   const checkpointStore = new RedisCheckpointStore(redis);
   const lastLsn = await checkpointStore.get();
 
@@ -62,7 +64,8 @@ async function main() {
     reader,
     parser,
     writer,
-    checkpointStore
+    checkpointStore,
+    dlq
   );
 
   while (true) {

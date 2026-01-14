@@ -3,13 +3,15 @@ import type { RawChangeEvent } from "./reader.js";
 import { ChangeParser } from "./parser.js";
 import { RedisWriter } from "./writer.js";
 import type { CheckpointStore } from "./checkpoint.js";
+import { DeadLetterQueue } from "./dlq.js";
 
 export class ChangeProcessor {
   constructor(
     private reader: ChangeReader,
     private parser: ChangeParser,
     private writer: RedisWriter,
-    private checkpoint: CheckpointStore
+    private checkpoint: CheckpointStore,
+    private dlq:DeadLetterQueue
   ) {}
 
   async processBatch(limit: number): Promise<number> {
@@ -30,11 +32,8 @@ export class ChangeProcessor {
 
         processed++;
       } catch (err) {
-        console.error("Failed to process event:", {
-          lsn: event.lsn,
-          error: err,
-        });
-
+        await this.dlq.push(event,"REDIS_WRITE_FAILED");
+        console.error("Sent event to DLQ:",event.lsn);
         // stop batch on failure to preserve ordering
         break;
       }
