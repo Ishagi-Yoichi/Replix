@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 import { config } from "./config.js";
 import { DatabaseConnection } from "./database.js";
 import { ChangeReader } from "./reader.js";
@@ -6,6 +6,8 @@ import { ChangeParser } from "./parser.js";
 import { RedisWriter } from "./writer.js";
 import { ChangeProcessor } from "./processor.js";
 import { RedisCheckpointStore } from "./checkpoint.js";
+import { ensureReplicationSlot } from "./slot.js";
+import { getSlotLag } from "./lag.js";
 
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -13,13 +15,31 @@ async function main() {
   const db = new DatabaseConnection();
   await db.connect();
 
+  setInterval(async () => {
+    try {
+      const lag = await getSlotLag(
+        db.getClient(),
+        config.replication.slotName
+      );
+  
+      if (lag) {
+        console.log(
+          `[SLOT LAG] ${lag.slotName}: ${lag.lagBytes} bytes`
+        );
+      }
+    } catch (err) {
+      console.error("Failed to fetch slot lag:", err);
+    }
+  }, 5000);
+
   // Ensure replication slot exists before starting
-  await db.ensureReplicationSlot(
+  await ensureReplicationSlot(
+    db.getClient(),
     config.replication.slotName,
     config.replication.plugin
   );
 
-  const redis = new Redis.Redis({
+  const redis = new Redis({
     host: config.redis.host,
     port: config.redis.port,
     password: config.redis.password,
