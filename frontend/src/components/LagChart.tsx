@@ -1,24 +1,25 @@
-import React from "react";
-import {
-  LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip
-} from "recharts";
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 
-interface Props {
-  slotLagBytes: number;
+type HistoryPoint ={
+    timestamp: number;
+    eps: number;
+    lag: number;
 }
-
-export default function LagChart({ slotLagBytes }: Props) {
-  const data = [{ name: "lag", value: slotLagBytes }];
-
+export default function LagChart({ history}:{history:HistoryPoint[]} ) {
   return (
     <div>
       <h4>Slot Lag (bytes)</h4>
-      <LineChart width={400} height={200} data={data}>
-        <Line type="monotone" dataKey="value" stroke="#8884d8" />
+      <LineChart width={600} height={250} data={history}>
+        <Line type="monotone" dataKey="lag" stroke="#8884d8" dot={false} />
         <CartesianGrid stroke="#ccc" />
-        <XAxis dataKey="name" />
+        <XAxis
+          dataKey="timestamp"
+          tickFormatter={(t) => new Date(t).toLocaleTimeString()}
+        />
         <YAxis />
-        <Tooltip />
+        <Tooltip
+          labelFormatter={(t) => new Date(t).toLocaleTimeString()}
+        />
       </LineChart>
     </div>
   );

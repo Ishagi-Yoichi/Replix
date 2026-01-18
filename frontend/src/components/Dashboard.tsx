@@ -3,27 +3,27 @@ import { MetricsData } from "../services/metrics";
 import LagChart from "./LagChart";
 import EventsChart from "./EventsChart";
 
+type HistoryPoint = {
+    timestamp: number;
+    eps: number;
+    lag: number;
+  };
+
 interface Props {
-  data: MetricsData;
+  latest:MetricsData | null;
+  history: HistoryPoint[];
 }
 
-function Dashboard({ data }: Props) {
+function Dashboard({ latest,history }: Props) {
+    if (!latest) return <div>Loading...</div>;
   return (
     <div>
-      <div style={{ marginBottom: "20px" }}>
-        <strong>Status:</strong>{" "}
-        <span style={{ color: data.status === "UP" ? "green" : "red" }}>
-          {data.status}
-        </span>
-      </div>
+    <h3>Status: <span style={{ color: latest.status === "UP" ? "green" : "red" }}>{latest.status}</span></h3>
+    <h4>DLQ Size: {latest.dlqSize}</h4>
 
-      <div style={{ marginBottom: "20px" }}>
-        <strong>DLQ Size:</strong> {data.dlqSize}
-      </div>
-
-      <EventsChart eventsPerSecond={data.eventsPerSecond} />
-      <LagChart slotLagBytes={data.slotLagBytes ?? 0} />
-    </div>
+    <EventsChart history={history} />
+    <LagChart history={history} />
+  </div>
   );
 }
 
