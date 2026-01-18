@@ -4,6 +4,7 @@ import { ChangeParser } from "./parser.js";
 import { RedisWriter } from "./writer.js";
 import type { CheckpointStore } from "./checkpoint.js";
 import { DeadLetterQueue } from "./dlq.js";
+import { Metrics } from "./metrics.js";
 
 export class ChangeProcessor {
   constructor(
@@ -11,7 +12,8 @@ export class ChangeProcessor {
     private parser: ChangeParser,
     private writer: RedisWriter,
     private checkpoint: CheckpointStore,
-    private dlq:DeadLetterQueue
+    private dlq:DeadLetterQueue,
+    private metrics:Metrics
   ) {}
 
   async processBatch(limit: number): Promise<number> {
@@ -29,6 +31,8 @@ export class ChangeProcessor {
 
         // ACK ONLY AFTER SUCCESS
         await this.checkpoint.set(event.lsn);
+
+        this.metrics.incrementEvents(event.lsn);
 
         processed++;
       } catch (err) {
