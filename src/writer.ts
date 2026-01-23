@@ -7,9 +7,8 @@ export class RedisWriter{
     constructor(redisConfig:{host:string,port:number,password?:string}){
         this.redis = new Redis.Redis({
             ...redisConfig,
-            retryStrategy: () => null,
             connectTimeout: 5000,
-            lazyConnect: true,
+            retryStrategy: (times) => Math.min(times*100,2000),
         });
     }
 

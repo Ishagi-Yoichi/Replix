@@ -21,9 +21,25 @@ async function main() {
   await db.connect();
 
   const metrics = new Metrics();
+   // initialize Redis (non-blocking)
+   const redis = new Redis({
+    host: config.redis.host,
+    port: config.redis.port,
+    password: config.redis.password,
+    retryStrategy: (times) => Math.min(times * 100, 2000),
+  });
+  console.log(
+    "[Redis Config]",
+    config.redis.host,
+    config.redis.port,
+    config.redis.password ? "(password set)" : "(no password)"
+  );
+  await redis.set("replix:test", "ok");
+console.log("Redis write test passed");
 
+  const dlq = new DeadLetterQueue(redis);
   // start HTTP server early, dlq is passed later
-  startHttpServer(metrics);
+  startHttpServer(metrics,dlq);
 
   console.log("[HTTP] Server started");
 
@@ -34,13 +50,7 @@ async function main() {
     config.replication.plugin
   );
 
-  // initialize Redis (non-blocking)
-  const redis = new Redis({
-    host: config.redis.host,
-    port: config.redis.port,
-    password: config.redis.password,
-    retryStrategy: (times) => Math.min(times * 100, 2000),
-  });
+ 
 
   redis.on("connect", () => {
     console.log("[Redis] Connected");
@@ -52,14 +62,12 @@ async function main() {
     metrics.setStatus("DOWN");
   });
 
-  const dlq = new DeadLetterQueue(redis);
+  
   const checkpointStore = new RedisCheckpointStore(redis);
 
   // now PATCH dlq size getter into server
   // by overriding startHttpServer with dlq presence
-  startHttpServer(metrics, async () => {
-    return await dlq.size();
-  });
+  startHttpServer(metrics, dlq);
 
   // tick events/sec every second
   setInterval(() => metrics.tickRate(), 1000);

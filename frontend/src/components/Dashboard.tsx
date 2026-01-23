@@ -2,6 +2,7 @@ import React from "react";
 import { MetricsData } from "../services/metrics";
 import LagChart from "./LagChart";
 import EventsChart from "./EventsChart";
+import DLQTable from "./DLQTable";
 
 type HistoryPoint = {
     timestamp: number;
@@ -17,6 +18,7 @@ interface Props {
 function Dashboard({ latest,history }: Props) {
     if (!latest) return <div>Loading...</div>;
     return (
+     
       <div className="p-4 space-y-4">
         <div className="flex items-center space-x-4">
           <span className={`px-3 py-1 rounded text-white ${latest.status === "UP" ? "bg-green-600" : "bg-red-600"}`}>
@@ -34,6 +36,7 @@ function Dashboard({ latest,history }: Props) {
           <EventsChart history={history} />
           <LagChart history={history} />
         </div>
+        <DLQTable/>
       </div>
     );
     

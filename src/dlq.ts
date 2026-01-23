@@ -19,4 +19,13 @@ export class DeadLetterQueue {
   async size(): Promise<number> {
     return this.redis.llen(this.KEY);
   }
+
+  async peek(start: number, end: number) {
+    const items = await this.redis.lrange(this.KEY, start, end);
+    return items.map(json => JSON.parse(json));
+  }
+  
+  
 }
+
+

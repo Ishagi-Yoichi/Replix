@@ -8,7 +8,7 @@ dotenv.config();
 
 export function startHttpServer(
   metrics: Metrics,
-  getDlqSize?:()=>Promise<number>
+  dlq:DeadLetterQueue
 ) {
   const app = express();
 
@@ -27,12 +27,25 @@ export function startHttpServer(
   // METRICS ENDPOINT
   app.get("/metrics", async (req, res) => {
     // ensure DLQ size is fresh
-   if(getDlqSize){
-    const size = await getDlqSize();
+   if(dlq.size){
+    const size = await dlq.size();
     metrics.updateDlqSize(size);
    }
    res.json(metrics.snapshot());
   });
+
+  app.get("/dlq", async (req, res) => {
+    try {
+      const size = await dlq.size();
+      const items = await dlq.peek(0, Math.min(size - 1, 100)); // cap at 100 items
+      res.json({ size, items });
+    } catch (err) {
+      console.error("Failed to fetch DLQ:", err);
+      res.status(500).json({ error: "DLQ fetch failed" });
+    }
+  });
+  
+  
 
   app.get("/",(req,res)=>{
     res.send("Hello");
