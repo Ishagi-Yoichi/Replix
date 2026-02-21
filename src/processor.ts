@@ -1,7 +1,6 @@
 import { ChangeReader } from "./reader.js";
 import type { RawChangeEvent } from "./reader.js";
 import { ChangeParser } from "./parser.js";
-import { RedisSink } from "./RediSink.js";
 import type { Sink } from "./sinks/Sink.js";
 import type { CheckpointStore } from "./checkpoint.js";
 import { DeadLetterQueue } from "./dlq.js";
@@ -12,10 +11,10 @@ export class ChangeProcessor {
   constructor(
     private reader: ChangeReader,
     private parser: ChangeParser,
-    private sinks: Sink[],
     private checkpoint: CheckpointStore,
     private dlq: DeadLetterQueue,
     private metrics: Metrics,
+    private sinks: Sink[],
   ) {}
 
   async processBatch(limit: number): Promise<number> {

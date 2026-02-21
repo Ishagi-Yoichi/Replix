@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  postgres:
+    build: ./postgres
+    container_name: replix-postgres
+    environment:
+      POSTGRES_USER: replix
+      POSTGRES_PASSWORD: replix
+      POSTGRES_DB: replix
+    ports:
+      - "5432:5432"
+    command: >
+      postgres
+      -c wal_level=logical
+      -c max_replication_slots=10
+      -c max_wal_senders=10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: replix-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@replix.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+
+  redis:
+    image: redis:7
+    container_name: replix-redis
+    ports:
+      - "6379:6379"
+
+  cdc-engine:
+    build: .
+    container_name: replix-cdc
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_USER: replix
+      PG_PASSWORD: replix
+      PG_DATABASE: replix
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+    restart: always
+
+  dashboard:
+    build: ./frontend
+    container_name: replix-dashboard
+    depends_on:
+      - cdc-engine
+    ports:
+      - "3001:3000"
+    restart: always
+
+volumes:
+  pgdata:

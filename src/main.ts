@@ -14,7 +14,7 @@ import { Metrics } from "./metrics.js";
 
 import { startHttpServer } from "./server.js";
 
-import { RedisSink } from "./sinks/RediSink.js";
+import { RedisSink } from "./sinks/RedisSink.js";
 import { FileSink } from "./sinks/FileSink.js";
 import { ConsoleSink } from "./sinks/ConsoleSink.js";
 
