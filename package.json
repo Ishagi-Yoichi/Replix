@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec ts-node src/main.ts",
+    "dev": "nodemon --watch src --ext ts --exec node --loader ./node_modules/ts-node/esm.mjs src/main.ts",
     "build": "tsc",
-    "start": "node dist/main.js",
+    "start": " node dist/main.js",
     "test:config": "node --loader ./node_modules/ts-node/esm.mjs tests/test-config.ts",
     "test:db": "node --loader ./node_modules/ts-node/esm.mjs tests/test-db.ts",
     "test:reader": "node --loader ./node_modules/ts-node/esm.mjs tests/test-reader.ts",

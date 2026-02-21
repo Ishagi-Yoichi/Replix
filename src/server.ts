@@ -1,19 +1,16 @@
 import express from "express";
 import type { Metrics } from "./metrics.js";
 import type { DeadLetterQueue } from "./dlq.js";
-import dotenv from 'dotenv';
-import cors from 'cors';
+import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
-export function startHttpServer(
-  metrics: Metrics,
-  dlq:DeadLetterQueue
-) {
+export function startHttpServer(metrics: Metrics, dlq: DeadLetterQueue) {
   const app = express();
 
   app.use(cors());
-  app.set('etag', false); // optional for polling freshness
+  app.set("etag", false); // optional for polling freshness
   // HEALTH ENDPOINT
   app.get("/health", (req, res) => {
     const snap = metrics.snapshot();
@@ -27,11 +24,11 @@ export function startHttpServer(
   // METRICS ENDPOINT
   app.get("/metrics", async (req, res) => {
     // ensure DLQ size is fresh
-   if(dlq.size){
-    const size = await dlq.size();
-    metrics.updateDlqSize(size);
-   }
-   res.json(metrics.snapshot());
+    if (dlq.size) {
+      const size = await dlq.size();
+      metrics.updateDlqSize(size);
+    }
+    res.json(metrics.snapshot());
   });
 
   app.get("/dlq", async (req, res) => {
@@ -44,12 +41,15 @@ export function startHttpServer(
       res.status(500).json({ error: "DLQ fetch failed" });
     }
   });
-  
-  
 
-  app.get("/",(req,res)=>{
+  app.delete("/dlq", async (req, res) => {
+    await dlq.clear();
+    res.json({ status: "cleared" });
+  });
+
+  app.get("/", (req, res) => {
     res.send("Hello");
-  })
+  });
 
   const PORT = process.env.METRICS_PORT || 3000;
   app.listen(PORT, () => {

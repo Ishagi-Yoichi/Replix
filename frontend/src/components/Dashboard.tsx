@@ -3,43 +3,63 @@ import { MetricsData } from "../services/metrics";
 import LagChart from "./LagChart";
 import EventsChart from "./EventsChart";
 import DLQTable from "./DLQTable";
+import ChartCard from "./ChartCard";
 
 type HistoryPoint = {
-    timestamp: number;
-    eps: number;
-    lag: number;
-  };
+  timestamp: number;
+  eps: number;
+  lag: number;
+};
 
 interface Props {
-  latest:MetricsData | null;
+  latest: MetricsData | null;
   history: HistoryPoint[];
 }
 
-function Dashboard({ latest,history }: Props) {
-    if (!latest) return <div>Loading...</div>;
-    return (
-     
-      <div className="p-4 space-y-4">
-        <div className="flex items-center space-x-4">
-          <span className={`px-3 py-1 rounded text-white ${latest.status === "UP" ? "bg-green-600" : "bg-red-600"}`}>
-            {latest.status}
-          </span>
-          <span className="px-3 py-1 bg-gray-200 rounded">
-            DLQ: {latest.dlqSize}
-          </span>
-          <span className="px-3 py-1 bg-gray-200 rounded">
-            Total Events: {latest.eventsTotal}
+function Dashboard({ latest, history }: Props) {
+  if (!latest) return <div>Loading...</div>;
+  return (
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
+      <div className="flex flex-wrap gap-4">
+        {/* STATUS */}
+        <div className="px-4 py-2 rounded-lg bg-gray-900 border border-gray-800 shadow">
+          <span
+            className={`font-semibold ${
+              latest.status === "UP" ? "text-green-400" : "text-red-400"
+            }`}
+          >
+            ● {latest.status}
           </span>
         </div>
-    
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <EventsChart history={history} />
-          <LagChart history={history} />
+
+        {/* DLQ */}
+        <div className="px-4 py-2 rounded-lg bg-gray-900 border border-gray-800 shadow">
+          DLQ: <span className="text-yellow-400">{latest.dlqSize}</span>
         </div>
-        <DLQTable/>
+
+        {/* TOTAL EVENTS */}
+        <div className="px-4 py-2 rounded-lg bg-gray-900 border border-gray-800 shadow">
+          Events: <span className="text-blue-400">{latest.eventsTotal}</span>
+        </div>
+
+        {/* EPS */}
+        <div className="px-4 py-2 rounded-lg bg-gray-900 border border-gray-800 shadow">
+          EPS: <span className="text-purple-400">{latest.eventsPerSecond}</span>
+        </div>
       </div>
-    );
-    
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
+        <ChartCard title="Events Per Second">
+          <EventsChart history={history} />
+        </ChartCard>
+
+        <ChartCard title="Replication Slot Lag">
+          <LagChart history={history} />
+        </ChartCard>
+      </div>
+      <DLQTable />
+    </div>
+  );
 }
 
 export default Dashboard;

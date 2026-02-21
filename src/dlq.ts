@@ -1,4 +1,4 @@
-import {Redis} from "ioredis";
+import { Redis } from "ioredis";
 
 export class DeadLetterQueue {
   private readonly KEY = "replix:dlq";
@@ -12,7 +12,7 @@ export class DeadLetterQueue {
         reason,
         event,
         ts: new Date().toISOString(),
-      })
+      }),
     );
   }
 
@@ -22,10 +22,10 @@ export class DeadLetterQueue {
 
   async peek(start: number, end: number) {
     const items = await this.redis.lrange(this.KEY, start, end);
-    return items.map(json => JSON.parse(json));
+    return items.map((json) => JSON.parse(json));
   }
-  
-  
+
+  async clear() {
+    await this.redis.del(this.KEY);
+  }
 }
-
-
