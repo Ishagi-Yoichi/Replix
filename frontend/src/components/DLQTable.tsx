@@ -25,7 +25,7 @@ export default function DLQTable() {
         onClick={async () => {
           await axios.delete("http://localhost:3000/dlq");
         }}
-        className="text-xs text-gray-400 hover:text-red-400"
+        className="text-xs text-gray-50 hover:text-red-400 bg-gray-700 px-4 py-2 rounded-lg mb-2"
       >
         Clear DLQ
       </button>

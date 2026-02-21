@@ -4,6 +4,7 @@ import LagChart from "./LagChart";
 import EventsChart from "./EventsChart";
 import DLQTable from "./DLQTable";
 import ChartCard from "./ChartCard";
+import EventStream from "./EventStreams";
 
 type HistoryPoint = {
   timestamp: number;
@@ -56,6 +57,8 @@ function Dashboard({ latest, history }: Props) {
         <ChartCard title="Replication Slot Lag">
           <LagChart history={history} />
         </ChartCard>
+
+        <EventStream />
       </div>
       <DLQTable />
     </div>
